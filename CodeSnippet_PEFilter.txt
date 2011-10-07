@@ -1,0 +1,38 @@
+#Code for Preemphasis filter in fm_emph.py.
+
+
+class fm_preemph(gr.hier_block):
+    """
+    FM Preemphasis IIR filter.
+    """
+    def __init__(self, fg, fs, tau1=50e-6, f2):
+        """
+        @param fg: flow graph
+        @type fg: gr.flow_graph
+        @param fs: sampling frequency in Hz
+        @type fs: float
+        @param tau1: Time constant in seconds (75us in US, 50us in EUR)
+        @type tau1: float
+        @param f2: cutoff frequency in Hz,choose f2 > f1 ( f1 is 2.12KHz in US, 3.2KHz in EUR)
+        @type f2: float
+        """
+        
+    tau2=tau1/(2*math.pi*f2*tau1-1)
+    w_1=1/tau1
+    w_2=1/tau2
+    w_p1=math.tan(w_1/(fs*2))
+    w_p2=math.tan(w_2/(fs*2))
+    b0=(w_p2+1)/(1+w_p1+w_p2)
+    b1=(w_p2-1)/(1+w_p1+w_p2)
+    a1=(w_p1+w_p2-1)/(w_p1+w_p2+1)
+    btaps = [b0,b1]
+             ataps = [1,a1]
+             if 0:
+                    print "btaps =", btaps
+                    print "ataps =", ataps
+                   global plot2
+                    plot2 = gru.gnuplot_freqz (gru.freqz (btaps, ataps), fs, True)
+            preemph = gr.iir_filter_ffd(10*btaps, ataps)
+    
+      gr.hier_block.__init__(self, fg, preemph, preemph)
+
